@@ -22,7 +22,6 @@ whitelist = [
 ]
 app.use cors({
 	origin: (origin, callback) ->
-		console.log 'origin', origin
 		callback null, origin in whitelist
 })
 
@@ -37,7 +36,7 @@ server.listen(process.env.PORT || 5000)
 ###
 	SOCKET.IO
 ###
-io.set 'origins', whitelist.map((o) -> o.split('//')[1] + ':*')
+io.set 'origins', ['pqp-chat.herokuapp.com:*', 'pucquepariu.herokuapp.com:*', 'pucquepariu2.herokuapp.com:*', '*.pucquepariu.com.br:*']
 io.sockets.on 'connection', (socket) ->
 	socket.on 'send-message', (data) ->
 		console.log 'Message received: ', data
