@@ -9,21 +9,7 @@ cors = require('cors')
 	MIDDLEWARE
 ###
 
-# CORS
-whitelist = [
-	'http://pucquepariu.com.br'
-	'https://pucquepariu.com.br'
-	'http://www.pucquepariu.com.br'
-	'https://www.pucquepariu.com.br'
-	'http://pucquepariu.herokuapp.com'
-	'https://pucquepariu.herokuapp.com'
-	'http://pucquepariu2.herokuapp.com'
-	'https://pucquepariu2.herokuapp.com'
-]
-app.use cors({
-	origin: (origin, callback) ->
-		callback null, origin in whitelist
-})
+app.use cors()
 
 # Serve static content
 app.use express.static(__dirname + '/public')
@@ -36,7 +22,6 @@ server.listen(process.env.PORT || 5000)
 ###
 	SOCKET.IO
 ###
-io.set 'origins', ['pqp-chat.herokuapp.com:*', 'pucquepariu.herokuapp.com:*', 'pucquepariu2.herokuapp.com:*', '*.pucquepariu.com.br:*']
 io.sockets.on 'connection', (socket) ->
 	socket.on 'send-message', (data) ->
 		console.log 'Message received: ', data
