@@ -1,0 +1,17 @@
+{
+  "name": "pqp-chat",
+  "version": "0.0.1",
+  "description": "Chat for PUCQuePariu.",
+  "main": "web.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:gberger/pqp-chat.git"
+  },
+  "dependencies": {
+    "socket.io": "~0.9.16",
+    "coffee-script": "~1.7.1"
+  }
+}
