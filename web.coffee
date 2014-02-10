@@ -24,5 +24,4 @@ io.set 'origins', '*:*'
 io.sockets.on 'connection', (socket) ->
 	socket.on 'send-message', (data) ->
 		console.log 'Message received: ', data
-		socket.emit 'broadcast-message', data
-		socket.broadcast.emit 'broadcast-message', data
+		io.sockets.emit "broadcast-message-#{data.course_abbreviation}", data
