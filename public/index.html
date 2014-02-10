@@ -73,6 +73,7 @@
             msg: $('#msg').val()
         }
         socket.emit('send-message', data);
+        $('#msg').val('');
         return false;
     });
 </script>
