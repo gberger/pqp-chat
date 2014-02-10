@@ -2,7 +2,7 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    var socket = io.connect('http://localhost');
+    var socket = io.connect(window.location.origin.split(':').slice(0, 2).join(':'));
     socket.on('broadcast-message', function(data){
         alert(data);
     })
