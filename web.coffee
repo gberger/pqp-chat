@@ -15,4 +15,4 @@ io = require('socket.io').listen(app)
 io.sockets.on 'connection', (socket) ->
 	socket.on 'send-message', (data) ->
 		console.log 'Message received: ', data
-		socket.emit 'broadcast-message', data
+		socket.broadcast.emit 'broadcast-message', data
