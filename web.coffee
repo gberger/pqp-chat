@@ -10,8 +10,6 @@ cors = require('cors')
 ###
 
 app.use cors()
-
-# Serve static content
 app.use express.static(__dirname + '/public')
 
 ###
@@ -22,6 +20,7 @@ server.listen(process.env.PORT || 5000)
 ###
 	SOCKET.IO
 ###
+io.set 'origins', '*:*'
 io.sockets.on 'connection', (socket) ->
 	socket.on 'send-message', (data) ->
 		console.log 'Message received: ', data
