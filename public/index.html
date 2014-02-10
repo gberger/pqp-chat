@@ -72,8 +72,9 @@
             name: $('#name').val(),
             msg: $('#msg').val()
         }
-        socket.emit('send-message', data);
         $('#msg').val('');
+        if(!data.msg) return false;
+        socket.emit('send-message', data);
         return false;
     });
 </script>
