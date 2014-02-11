@@ -29,29 +29,30 @@ server.listen(process.env.PORT || 5000)
 ###
 	SOCKET.IO
 ###
+io.set 'origins', '*:*'
+
 emitMessage = (data) ->
 	io.sockets.emit "broadcast-message-#{data.course_abbreviation}", _.pick(data, 'name', 'msg')
 
 mongo.Db.connect mongoUri, (err, db) ->
 	throw err if err
 
-	io.set 'origins', '*:*'
 	io.sockets.on 'connection', (socket) ->
 		socket.on 'send-message', (data) ->
 
-				dbUsers = db.collection('users')
-				dbUsers.find({oauth_token: data.oauth_token}).toArray (err, results) ->
-					throw err if err
-					user = results[0]
+			dbUsers = db.collection('users')
+			dbUsers.find({oauth_token: data.oauth_token}).toArray (err, results) ->
+				throw err if err
+				user = results[0]
 
-					if user
-						data.name = user['name']
-						emitMessage data
-					else
-						request.get json: true, uri: "https://graph.facebook.com/me?fields=name&access_token=#{data.oauth_token}",
-							(err, resp, body) ->
+				if user
+					data.name = user['name']
+					emitMessage data
+				else
+					request.get json: true, uri: "https://graph.facebook.com/me?fields=name&access_token=#{data.oauth_token}",
+						(err, resp, body) ->
+							throw err if err
+							data.name = body.name
+							dbUsers.insert {name: data.name, oauth_token: data.oauth_token}, (err, data) ->
 								throw err if err
-								data.name = body.name
-								dbUsers.insert {name: data.name, oauth_token: data.oauth_token}, (err, data) ->
-									throw err if err
-								emitMessage data
+							emitMessage data
