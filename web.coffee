@@ -39,16 +39,17 @@ mongo.Db.connect mongoUri, (err, db) ->
 	io.sockets.on 'connection', (socket) ->
 		socket.on 'send-message', (data) ->
 
-				users = db.collection 'users'
-				user = users.find({oauth_token: data.oauth_token}).toArray()[0]
+				db.users.find({oauth_token: data.oauth_token}).toArray (err, results) ->
+					throw err if err
+						user = results[0]
 
-				if user
-					data.name = user['name']
-					emitMessage data
-				else
-					request.get json: true, uri: "https://graph.facebook.com/me?fields=name&access_token=#{data.oauth_token}",
-						(err, resp, body) ->
-							throw err if err
-							data.name = body.name
-							users.insert name: data.name, oauth_token: data.oauth_token
-							emitMessage data
+					if user
+						data.name = user['name']
+						emitMessage data
+					else
+						request.get json: true, uri: "https://graph.facebook.com/me?fields=name&access_token=#{data.oauth_token}",
+							(err, resp, body) ->
+								throw err if err
+								data.name = body.name
+								users.insert name: data.name, oauth_token: data.oauth_token
+								emitMessage data
