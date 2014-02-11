@@ -39,7 +39,7 @@ mongo.Db.connect mongoUri, (err, db) ->
 	io.sockets.on 'connection', (socket) ->
 		socket.on 'send-message', (data) ->
 
-				db.users.find({oauth_token: data.oauth_token}).toArray (err, results) ->
+				db.collection('users').find({oauth_token: data.oauth_token}).toArray (err, results) ->
 					throw err if err
 						user = results[0]
 
