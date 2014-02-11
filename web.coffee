@@ -5,12 +5,12 @@ io = require('socket.io').listen(server)
 
 request = require('request')
 
+
 ###
 	MONGODB
 ###
 mongo = require('mongodb')
 mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/mydb';
-
 
 
 ###
@@ -39,7 +39,8 @@ mongo.Db.connect mongoUri, (err, db) ->
 	io.sockets.on 'connection', (socket) ->
 		socket.on 'send-message', (data) ->
 
-				db.collection('users').find({oauth_token: data.oauth_token}).toArray (err, results) ->
+				dbUsers = db.collection('users')
+				dbUsers.find({oauth_token: data.oauth_token}).toArray (err, results) ->
 					throw err if err
 					user = results[0]
 
@@ -51,5 +52,5 @@ mongo.Db.connect mongoUri, (err, db) ->
 							(err, resp, body) ->
 								throw err if err
 								data.name = body.name
-								users.insert name: data.name, oauth_token: data.oauth_token
+								dbUsers.insert name: data.name, oauth_token: data.oauth_token
 								emitMessage data
