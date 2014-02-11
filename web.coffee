@@ -40,10 +40,10 @@ mongo.Db.connect mongoUri, (err, db) ->
 		socket.on 'send-message', (data) ->
 
 				users = db.collection 'users'
-				userCursor = users.find({oauth_token: data.oauth_token})
+				user = users.find({oauth_token: data.oauth_token}).toArray()[0]
 
-				if userCursor.hasNext()
-					data.name = userCursor.next()['name']
+				if user
+					data.name = user['name']
 					emitMessage data
 				else
 					request.get json: true, uri: "https://graph.facebook.com/me?fields=name&access_token=#{data.oauth_token}",
