@@ -37,13 +37,9 @@ mongo.Db.connect mongoUri, (err, db) ->
 	dbUsers = db.collection('users')
 	dbMessages = db.collection('messages')
 
-	filterMessage = (data) ->
-		_.pick(data, 'name', 'msg', 'course', 'timestamp')
-
 	emitMessage = (data) ->
+		filteredData = _.pick(data, 'name', 'msg', 'course', 'timestamp')
 		io.sockets.emit "broadcast-message-#{data.course}", filteredData
-
-	saveMessage = (data) ->
 		dbMessages.insert filteredData, (err, data) ->
 			throw err if err
 
@@ -62,12 +58,10 @@ mongo.Db.connect mongoUri, (err, db) ->
 			dbUsers.find({oauth_token: data.oauth_token}).toArray (err, results) ->
 				throw err if err
 				user = results[0]
-				messageData = filterMessage data
 
 				if user
 					data.name = user['name']
-					emitMessage messageData
-					saveMessage messageData
+					emitMessage data
 				else
 					request.get json: true, uri: "https://graph.facebook.com/me?fields=name&access_token=#{data.oauth_token}",
 						(err, resp, body) ->
@@ -75,5 +69,4 @@ mongo.Db.connect mongoUri, (err, db) ->
 							data.name = body.name
 							dbUsers.insert {name: data.name, oauth_token: data.oauth_token}, (err, data) ->
 								throw err if err
-							emitMessage messageData
-							saveMessage messageData
+							emitMessage data
