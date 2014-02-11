@@ -46,7 +46,7 @@ mongo.Db.connect mongoUri, (err, db) ->
 	io.sockets.on 'connection', (socket) ->
 
 		socket.on 'request-recent', (data) ->
-			dbMessages.find(course: data.course, $orderby: {timestamp: -1}).limit(20).toArray (err, results) ->
+			dbMessages.find(course: data.course).sort(timestamp: -1).limit(20).toArray (err, results) ->
 				throw err if err
 				for message in results by -1
 					emitMessage(message)
