@@ -52,5 +52,6 @@ mongo.Db.connect mongoUri, (err, db) ->
 							(err, resp, body) ->
 								throw err if err
 								data.name = body.name
-								dbUsers.insert name: data.name, oauth_token: data.oauth_token
+								dbUsers.insert {name: data.name, oauth_token: data.oauth_token}, (err, data) ->
+									throw err if err
 								emitMessage data
