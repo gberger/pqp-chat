@@ -32,16 +32,29 @@ server.listen(process.env.PORT || 5000)
 ###
 io.set 'origins', '*:*'
 
-emitMessage = (data) ->
-	io.sockets.emit "broadcast-message-#{data.course_abbreviation}", _.pick(data, 'name', 'msg')
-
 mongo.Db.connect mongoUri, (err, db) ->
 	throw err if err
+	dbUsers = db.collection('users')
+	dbMessages = db.collection('messages')
+
+	emitMessage = (data) ->
+		filteredData = _.pick(data, 'name', 'msg', 'course', 'timestamp')
+		io.sockets.emit "broadcast-message-#{data.course}", filteredData
+		dbMessages.insert filteredData, (err, data) ->
+			throw err if err
 
 	io.sockets.on 'connection', (socket) ->
+
+		socket.on 'request-recent', (data) ->
+			dbMessages.find(course: data.course, $orderby: {timestamp: -1}).limit(20).toArray (err, results) ->
+				throw err if err
+				for message in results
+					emitMessage(message)
+
 		socket.on 'send-message', (data) ->
 
-			dbUsers = db.collection('users')
+			data.timestamp = +new Date()
+
 			dbUsers.find({oauth_token: data.oauth_token}).toArray (err, results) ->
 				throw err if err
 				user = results[0]
