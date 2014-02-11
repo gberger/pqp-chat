@@ -41,7 +41,7 @@ mongo.Db.connect mongoUri, (err, db) ->
 
 				db.collection('users').find({oauth_token: data.oauth_token}).toArray (err, results) ->
 					throw err if err
-						user = results[0]
+					user = results[0]
 
 					if user
 						data.name = user['name']
