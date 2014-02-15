@@ -65,3 +65,15 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 						io.sockets.emit "broadcast-message-#{data.course}", filteredData
 						console.info "ChatMessage: #{JSON.stringify(filteredData)}"
 
+		socket.on 'delete-message', (data) ->
+			User.find {oauth_token: data.oauth_token}, (err, users) ->
+				throw err if err
+				user = users[0]
+				return unless user.is_admin
+
+				ChatMessage.get data.id, (err, msg) ->
+					throw err if err
+					msg.remove (err) ->
+						throw err if err
+
+						io.sockets.emit "broadcast-delete-message", id: data.id
