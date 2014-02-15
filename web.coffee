@@ -26,6 +26,8 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 
 	ChatMessage = db.define 'chat_messages',
 		text: String
+	,
+		timestamp: true
 
 	ChatMessage.hasOne('course', Course)
 	ChatMessage.hasOne('user', User)
