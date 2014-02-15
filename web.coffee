@@ -52,8 +52,8 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 					io.sockets.emit "broadcast-message-#{data.course}", filteredData
 					console.info "ChatMessage: #{JSON.stringify(filteredData)}"
 					ChatMessage.create [{
-						course_id: course
-						user_id: user
+						course_id: course.id
+						user_id: user.id
 						text: data.msg
 					}], (err, items) ->
 						throw err if err
