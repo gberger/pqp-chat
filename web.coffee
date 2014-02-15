@@ -3,75 +3,56 @@ express = require('express')
 app = express()
 server = require('http').createServer(app)
 io = require('socket.io').listen(server)
-
-request = require('request')
-
-
-###
-	MONGODB
-###
-mongo = require('mongodb')
-mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/mydb';
-
-
-###
-	MIDDLEWARE
-###
 cors = require('cors')
+
 app.use cors()
-
-
-###
-	SERVER START
-###
-server.listen(process.env.PORT || 5000)
-
-
-###
-	SOCKET.IO
-###
 io.set 'origins', '*:*'
 
-mongo.Db.connect mongoUri, (err, db) ->
+ORM = require('orm')
+modts = require('orm-timestamps');
+ORM.connect process.env.DATABASE_URL, (err, db) ->
 	throw err if err
-	dbUsers = db.collection('users')
-	dbMessages = db.collection('messages')
 
-	emitMessage = (data) ->
-		filteredData = _.pick(data, 'name', 'msg', 'course', 'timestamp')
-		io.sockets.emit "broadcast-message-#{data.course}", filteredData
+	db.use modts
 
-	saveMessage = (data) ->
-		filteredData = _.pick(data, 'name', 'msg', 'course', 'timestamp')
-		dbMessages.insert filteredData, (err, data) ->
-			throw err if err
+	User = db.define 'users',
+		name: String
+		oauth_token: String
+		is_admin: Boolean
+
+	Course = db.define 'courses',
+		name: String
+		abbreviation: String
+
+	ChatMessage = db.define 'chat_messages',
+		created_at: Date
+		updated_at: Date
+
+	ChatMessage.hasOne('course', Course)
+	ChatMessage.hasOne('user', User)
+
+
+	server.listen(process.env.PORT || 5000)
+
 
 	io.sockets.on 'connection', (socket) ->
-
-		socket.on 'request-recent', (data) ->
-			dbMessages.find(course: data.course).sort(timestamp: -1).limit(20).toArray (err, results) ->
-				throw err if err
-				for message in results by -1
-					emitMessage(message)
-
 		socket.on 'send-message', (data) ->
-
 			data.timestamp = +new Date()
-
-			dbUsers.find({oauth_token: data.oauth_token}).toArray (err, results) ->
+			User.find {oauth_token: data.oauth_token}, (err, users) ->
 				throw err if err
-				user = results[0]
+				Course.find {abbreviation: data.course}, (err, courses) ->
+					throw err if err
 
-				if user
-					data.name = user['name']
-					emitMessage data
-					saveMessage data
-				else
-					request.get json: true, uri: "https://graph.facebook.com/me?fields=name&access_token=#{data.oauth_token}",
-						(err, resp, body) ->
-							throw err if err
-							data.name = body.name
-							dbUsers.insert {name: data.name, oauth_token: data.oauth_token}, (err, data) ->
-								throw err if err
-							emitMessage data
-							saveMessage data
+					user = users[0]
+					course = courses[0]
+
+					data.name = user.name
+					data.msg = data.msg.slice(0, 512)
+					filteredData = _.pick(data, 'name', 'msg', 'course', 'timestamp')
+					io.sockets.emit "broadcast-message-#{data.course}", filteredData
+					ChatMessage.create [{
+						course_id: course
+						user_id: user
+						text: data.msg
+					}], (err, items) ->
+						throw err if err
