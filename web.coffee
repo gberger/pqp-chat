@@ -13,7 +13,8 @@ modts = require('orm-timestamps');
 ORM.connect process.env.DATABASE_URL, (err, db) ->
 	throw err if err
 
-	db.use modts
+	db.use modts,
+		modified_at: 'updated_at'
 
 	User = db.define 'users',
 		name: String
