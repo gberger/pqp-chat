@@ -25,8 +25,7 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 		abbreviation: String
 
 	ChatMessage = db.define 'chat_messages',
-		created_at: Date
-		updated_at: Date
+		text: String
 
 	ChatMessage.hasOne('course', Course)
 	ChatMessage.hasOne('user', User)
