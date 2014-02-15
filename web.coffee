@@ -14,7 +14,7 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 	throw err if err
 
 	db.use modts,
-		modified_at: 'updated_at'
+		modifiedProperty: 'updated_at'
 
 	User = db.define 'users',
 		name: String
