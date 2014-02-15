@@ -58,4 +58,6 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 						user_id: user.id
 						text: data.msg
 					message.save (err) ->
-						throw err if err
+						if err
+							console.error err.msg
+							throw err
