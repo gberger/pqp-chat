@@ -50,10 +50,6 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 
 					data.name = user.name
 					data.msg = data.msg.slice(0, 512)
-					filteredData = _.pick(data, 'name', 'msg', 'course', 'timestamp')
-
-					io.sockets.emit "broadcast-message-#{data.course}", filteredData
-					console.info "ChatMessage: #{JSON.stringify(filteredData)}"
 
 					message = new ChatMessage
 						course_id: course.id
@@ -63,3 +59,9 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 						if err
 							console.error err.msg
 							throw err
+
+						data.id = message.id
+						filteredData = _.pick(data, 'name', 'msg', 'course', 'timestamp', 'id')
+						io.sockets.emit "broadcast-message-#{data.course}", filteredData
+						console.info "ChatMessage: #{JSON.stringify(filteredData)}"
+
