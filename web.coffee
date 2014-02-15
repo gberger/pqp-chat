@@ -50,6 +50,7 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 					data.msg = data.msg.slice(0, 512)
 					filteredData = _.pick(data, 'name', 'msg', 'course', 'timestamp')
 					io.sockets.emit "broadcast-message-#{data.course}", filteredData
+					console.info "ChatMessage: #{JSON.stringify(filteredData)}"
 					ChatMessage.create [{
 						course_id: course
 						user_id: user
