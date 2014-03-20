@@ -19,14 +19,16 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 	User = db.define 'users',
 		name: String
 		oauth_token: String
-		is_admin: Boolean
+		role: String
 
 	Course = db.define 'courses',
 		name: String
 		abbreviation: String
+		teacher_id: Number
 
 	ChatMessage = db.define 'chat_messages',
 		text: String
+		course_id: Number
 	,
 		timestamp: true
 
@@ -66,14 +68,17 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 						console.info "ChatMessage: #{JSON.stringify(filteredData)}"
 
 		socket.on 'delete-message', (data) ->
-			User.find {oauth_token: data.oauth_token}, (err, users) ->
+			ChatMessage.get data.id, (err, msg) ->
 				throw err if err
-				user = users[0]
-				return unless user.is_admin
 
-				ChatMessage.get data.id, (err, msg) ->
+				User.find {oauth_token: data.oauth_token}, (err, users) ->
 					throw err if err
-					msg.remove (err) ->
-						throw err if err
+					user = users[0]
 
-						io.sockets.emit "broadcast-delete-message", id: data.id
+					Course.get msg.course_id, (err, course) ->
+						throw err if err
+						return unless user.id == course.teacher_id
+
+						msg.remove (err) ->
+							throw err if err
+							io.sockets.emit "broadcast-delete-message", id: data.id
