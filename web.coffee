@@ -77,7 +77,7 @@ ORM.connect process.env.DATABASE_URL, (err, db) ->
 
 					Course.get msg.course_id, (err, course) ->
 						throw err if err
-						return unless user.id == course.teacher_id
+						return unless user.id == course.teacher_id || user.role == 'admin'
 
 						msg.remove (err) ->
 							throw err if err
